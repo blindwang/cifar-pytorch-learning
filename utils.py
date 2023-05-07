@@ -29,7 +29,7 @@ def bulid_tensorboard_writer(dir_type, model_type):
     return train_summary_writer, test_summary_writer
 
 
-def plot_loss_acc(experiment_id, csv_path, pic_path):
+def plot_loss_acc(experiment_id, flag, csv_path, pic_path):
     csv_path = Path('tmp') / csv_path
     os.makedirs('tmp', exist_ok=True)
 
@@ -47,8 +47,8 @@ def plot_loss_acc(experiment_id, csv_path, pic_path):
     # Filter the DataFrame to only validation data, which is what the subsequent
     # analyses and visualization will be focused on.
     # print(dfw)
-    dfw_acc = dfw[(dfw['run'].str.startswith("compare_optim")) & (dfw['tag'] == "accuracy")]
-    dfw_loss = dfw[(dfw['run'].str.startswith("compare_optim")) & (dfw['tag'] == "loss")]
+    dfw_acc = dfw[(dfw['run'].str.startswith(flag)) & (dfw['tag'] == "accuracy")]
+    dfw_loss = dfw[(dfw['run'].str.startswith(flag)) & (dfw['tag'] == "loss")]
     # print(dfw)
     # Get the optimizer value for each row of the validation DataFrame.
     optimizer_acc = dfw_acc.run.apply(lambda run: run.split(",")[0].split('\\')[1])

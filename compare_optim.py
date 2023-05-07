@@ -53,14 +53,14 @@ learning_rate = 0.001
 num_epochs = 20
 num_workers = 2  # CPU中为0，GPU可以不为0
 
-for model_name in models_ls:
+for model_name in models_ls[3:4]:
     """读取数据"""
     if model_name == 'lenet':
         trainloader, testloader, trainset, testset = build_dataloader_simple(batch_size, num_workers)
     else:
         trainloader, testloader, trainset, testset = build_dataloader(batch_size, num_workers)
 
-    for opt in optimizers:
+    for opt in optimizers[1:]:
         if model_name == 'lenet':
             model = LeNet5().to(device)
             learning_rate = 0.001
