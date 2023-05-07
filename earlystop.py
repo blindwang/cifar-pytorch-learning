@@ -26,8 +26,9 @@ class EarlyStopping:
         self.early_stop = False
         self.val_loss_min = np.Inf
         self.delta = delta
-        self.save_path = Path('models_weight') / (model_name + '.pkl')
-
+        root_dir = Path('models_weight')
+        root_dir.mkdir(exist_ok=True)
+        self.save_path = root_dir / (model_name + '.pkl')
 
     def __call__(self, val_loss, model):
 

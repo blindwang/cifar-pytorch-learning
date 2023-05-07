@@ -1,10 +1,10 @@
-import tensorflow as tf
 import torch.nn as nn
 import torch
 import torch.optim as optim
-import shutil
 import random
 import numpy as np
+import warnings
+warnings.filterwarnings("ignore")
 
 from train import train
 from evaluate import evaluate
@@ -26,31 +26,23 @@ torch.manual_seed(seed)
 torch.cuda.manual_seed(seed)
 torch.cuda.manual_seed_all(seed)
 
-models_ls = ["resnet18", "resnet50", "vgg16", "vgg16bn", "vgg19",
-             "vgg19bn", "alexnet", "googlenet"]
-# models_ls = {"resnet18": resnet18, "resnet50": resnet50, "vgg16": vgg16, "vgg16bn": vgg16bn, "vgg19": vgg19,
-#                      "vgg19bn": vgg19bn, "alexnet": alexnet, "googlenet": googlenet}
+# models_ls = ["resnet18", "resnet50", "vgg16", "vgg16bn", "vgg19",
+#              "vgg19bn", "alexnet", "googlenet"]
 
+models_ls = ["resnet18", "vgg16", "alexnet", "googlenet"]
 
 # 判断是否有可用的GPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
-# criterion = nn.CrossEntropyLoss()
-#
-# # Observe that all parameters are being optimized
-# optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
-#
-# # Decay LR by a factor of 0.1 every 7 epochs
-# exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
-for model_name in models_ls:
+for model_name in models_ls[1:]:
     print(f"Training {model_name} model...")
 
     """默认超参数"""
     batch_size = 128
     learning_rate = 0.001
     num_epochs = 100
-    num_workers = 0  # CPU中为0，GPU可以不为0
+    num_workers = 2  # CPU中为0，GPU可以不为0
 
     """tensorboard writer"""
     train_summary_writer, test_summary_writer = bulid_tensorboard_writer("compare_base", model_name)
@@ -64,7 +56,7 @@ for model_name in models_ls:
 
     """定义默认损失函数和优化器"""
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=learning_rate)
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     """设置早停策略"""
     earlystop = EarlyStopping(model_name=model_name)

@@ -20,4 +20,4 @@ def build_dataloader(batch_size, num_workers):
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_dataset = datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-    return train_dataset, train_loader, test_dataset, test_loader
+    return train_loader, test_loader, train_dataset, test_loader
