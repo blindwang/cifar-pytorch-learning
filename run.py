@@ -34,7 +34,7 @@ torch.cuda.manual_seed_all(seed)
 models_ls = ["resnet18", "vgg16", "googlenet"]
 
 # 判断是否有可用的GPU
-device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
 for model_name in models_ls[:1]:
