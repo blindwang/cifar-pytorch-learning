@@ -19,10 +19,11 @@ def train(trainloader, net, criterion, optimizer, epoch, device, train_summary_w
             # accuracy
             accuracy = (labels == torch.argmax(outputs, dim=1)).float().sum() / labels.shape[0]
             # 在tqdm中展示loss
-            tbar.set_postfix(running_loss=loss.item(), acc=accuracy)
+            tbar.set_postfix(running_loss=loss.item(), acc=f'{100 * accuracy.item():.2f}%')
             # 更新进度条
             tbar.update()
 
             # with train_summary_writer.as_default():
             #     tf.summary.scalar('loss', loss.item(), step=epoch * len(trainloader) + i)
             train_summary_writer.add_scalar('loss', loss.item(), epoch * len(trainloader) + i)
+            train_summary_writer.add_scalar('acc', accuracy.item(), epoch * len(trainloader) + i)
