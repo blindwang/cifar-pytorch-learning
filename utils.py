@@ -1,12 +1,14 @@
 import os
 
-import tensorflow as tf
+# import tensorflow as tf
 import shutil
 from pathlib import Path
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import tensorboard as tb
+
+from tensorboardX import SummaryWriter
 
 
 def bulid_tensorboard_writer(dir_type, model_type):
@@ -19,9 +21,11 @@ def bulid_tensorboard_writer(dir_type, model_type):
     shutil.rmtree(train_log_dir, ignore_errors=True)
     shutil.rmtree(test_log_dir, ignore_errors=True)
 
-    train_summary_writer = tf.summary.create_file_writer(str(train_log_dir))
-    test_summary_writer = tf.summary.create_file_writer(str(test_log_dir))
+    # train_summary_writer = tf.summary.create_file_writer(str(train_log_dir))
+    # test_summary_writer = tf.summary.create_file_writer(str(test_log_dir))
 
+    train_summary_writer = SummaryWriter(logdir=str(train_log_dir))
+    test_summary_writer = SummaryWriter(logdir=str(test_log_dir))
     return train_summary_writer, test_summary_writer
 
 

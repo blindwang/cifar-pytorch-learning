@@ -3,6 +3,7 @@ import torch
 import torch.optim as optim
 import random
 import numpy as np
+import math
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -11,6 +12,7 @@ from evaluate import evaluate
 from dataloader import build_dataloader
 from finetune_pretrained_model import finetune_pretrained_model
 from utils import bulid_tensorboard_writer
+from optimizer import get_optim, get_scheduler
 from earlystop import EarlyStopping
 """随机种子"""
 seed = 2023
@@ -32,16 +34,16 @@ torch.cuda.manual_seed_all(seed)
 models_ls = ["resnet18", "vgg16", "googlenet"]
 
 # 判断是否有可用的GPU
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 print(device)
 
-for model_name in models_ls[2:]:
+for model_name in models_ls[:1]:
     print(f"Training {model_name} model...")
 
     """默认超参数"""
     batch_size = 128
-    learning_rate = 1e-5
-    num_epochs = 100
+    learning_rate = 5e-6
+    num_epochs = 10
     num_workers = 2  # CPU中为0，GPU可以不为0
 
     """tensorboard writer"""
@@ -56,14 +58,19 @@ for model_name in models_ls[2:]:
 
     """定义默认损失函数和优化器"""
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    # optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = get_optim(model, model_name, optim_name="adam", lr=learning_rate,
+                          weight_decay=0.05, lr_decay_factor=0.75)
+    scheduler = get_scheduler(optimizer,
+                              3 * math.ceil(len(trainset) / batch_size),
+                              num_epochs * math.ceil(len(trainset) / batch_size))
 
     """设置早停策略"""
     earlystop = EarlyStopping(model_name=model_name)
 
     # 训练模型
     for epoch in range(num_epochs):
-        train(trainloader, model, criterion, optimizer, epoch, device, train_summary_writer)
+        train(trainloader, model, criterion, optimizer, epoch, device, train_summary_writer, scheduler)
         acc = evaluate(testloader, model, epoch, device, test_summary_writer)
         earlystop(-acc, model_name)
         if earlystop.early_stop:

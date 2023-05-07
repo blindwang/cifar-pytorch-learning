@@ -1,4 +1,4 @@
-import tensorflow as tf
+# import tensorflow as tf
 from tqdm import tqdm
 import torch
 
@@ -23,7 +23,8 @@ def evaluate(testloader, net, epoch, device, test_summary_writer):
                 # 更新进度条
                 tbar.update()
         acc = 100 * correct / total
-        with test_summary_writer.as_default():
-            tf.summary.scalar('accuracy', acc, step=epoch)
+        # with test_summary_writer.as_default():
+        #     tf.summary.scalar('accuracy', acc, step=epoch)
+        test_summary_writer.add_scalar('accuracy', acc, epoch)
 
     return acc
