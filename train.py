@@ -1,5 +1,6 @@
-import tensorflow as tf
+# import tensorflow as tf
 from tqdm import tqdm
+from tensorboardX import SummaryWriter
 
 
 def train(trainloader, net, criterion, optimizer, epoch, device, train_summary_writer):
@@ -23,5 +24,6 @@ def train(trainloader, net, criterion, optimizer, epoch, device, train_summary_w
             if (i + 1) % 100 == 0:
                 running_loss = 0.0
 
-            with train_summary_writer.as_default():
-                tf.summary.scalar('loss', loss.item(), step=epoch * len(trainloader) + i)
+            # with train_summary_writer.as_default():
+            #     tf.summary.scalar('loss', loss.item(), step=epoch * len(trainloader) + i)
+            train_summary_writer.add_scalar('loss', loss.item(), epoch * len(trainloader) + i)
