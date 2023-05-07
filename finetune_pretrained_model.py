@@ -12,6 +12,7 @@ def finetune_pretrained_model(model_name):
         model = models.resnet18(weights=ResNet18_Weights.DEFAULT)
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, 10)
+        nn.init.xavier_uniform_(model.fc.weight)
     elif model_name == "resnet50":
         model = models.resnet50(weights=ResNet50_Weights.DEFAULT)
         num_ftrs = model.fc.in_features
@@ -40,17 +41,18 @@ def finetune_pretrained_model(model_name):
         model = models.googlenet(weights=GoogLeNet_Weights.DEFAULT)
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, 10)
+        nn.init.xavier_uniform_(model.fc.weight)
 
-    # 对于模型的每个权重，使其不进行反向传播，即固定参数
-    for param in model.parameters():
-        param.requires_grad = False
-    # 但是参数全部固定了，也没法进行学习，所以我们不固定最后一层，即全连接层
-    if model_name in ["vgg16", "vgg19", "vgg16bn", "vgg19bn", "alexnet"]:
-        for param in model.classifier.parameters():
-            param.requires_grad = True
-    else:
-        for param in model.fc.parameters():
-            param.requires_grad = True
+    # # 对于模型的每个权重，使其不进行反向传播，即固定参数
+    # for param in model.parameters():
+    #     param.requires_grad = False
+    # # 但是参数全部固定了，也没法进行学习，所以我们不固定最后一层，即全连接层
+    # if model_name in ["vgg16", "vgg19", "vgg16bn", "vgg19bn", "alexnet"]:
+    #     for param in model.classifier.parameters():
+    #         param.requires_grad = True
+    # else:
+    #     for param in model.fc.parameters():
+    #         param.requires_grad = True
 
     return model
 

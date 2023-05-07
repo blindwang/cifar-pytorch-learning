@@ -1,10 +1,10 @@
 # import tensorflow as tf
 from tqdm import tqdm
+import torch
 from tensorboardX import SummaryWriter
 
 
-def train(trainloader, net, criterion, optimizer, epoch, device, train_summary_writer):
-    running_loss = 0.0
+def train(trainloader, net, criterion, optimizer, epoch, device, train_summary_writer, scheduler):
     net.train()
     with tqdm(trainloader, desc=f'Train epoch {epoch}') as tbar:
         for i, data in enumerate(trainloader):
@@ -15,14 +15,13 @@ def train(trainloader, net, criterion, optimizer, epoch, device, train_summary_w
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
-            running_loss += loss.item()
+            scheduler.step()  # 调节学习率
+            # accuracy
+            accuracy = (labels == torch.argmax(outputs, dim=1)).float().sum() / labels.shape[0]
             # 在tqdm中展示loss
-            tbar.set_postfix(running_loss=loss.item())
+            tbar.set_postfix(running_loss=loss.item(), acc=accuracy)
             # 更新进度条
             tbar.update()
-
-            if (i + 1) % 100 == 0:
-                running_loss = 0.0
 
             # with train_summary_writer.as_default():
             #     tf.summary.scalar('loss', loss.item(), step=epoch * len(trainloader) + i)
