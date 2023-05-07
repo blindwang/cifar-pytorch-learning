@@ -25,7 +25,7 @@ def _get_resnet_name_to_layer(pt_model):
 
 
 def _get_vgg_name_to_layer(pt_model):
-    """获取googlenet中参数的分层，从0开始，层数越高表示越顶层，全连和辅助分类器是最顶层（5），返回name: layer的字典"""
+    """获取vgg中参数的分层，从0开始，层数越高表示越顶层，全连和辅助分类器是最顶层（5），返回name: layer的字典"""
     name_to_layer = {}
     for k, v in pt_model.named_parameters():
         if v.shape[0] == 64:
@@ -44,12 +44,24 @@ def _get_vgg_name_to_layer(pt_model):
 
 
 def _get_alexnet_name_to_layer(pt_model):
-    """获取googlenet中参数的分层，从0开始，层数越高表示越顶层，全连和辅助分类器是最顶层（5），返回name: layer的字典"""
+    """获取alexnet中参数的分层，从0开始，层数越高表示越顶层，全连和辅助分类器是最顶层（5），返回name: layer的字典"""
     name_to_layer = {}
     for k, v in pt_model.named_parameters():
         if k.startswith('features'):
             name_to_layer[k] = 0
         elif k.startswith('classifier'):
+            name_to_layer[k] = 1
+        else:
+            print("ERROR")
+    return name_to_layer, 1
+
+def _get_lenet_name_to_layer(pt_model):
+    """获取lenet中参数的分层，从0开始，层数越高表示越顶层，全连和辅助分类器是最顶层（5），返回name: layer的字典"""
+    name_to_layer = {}
+    for k, v in pt_model.named_parameters():
+        if k.startswith('conv'):
+            name_to_layer[k] = 0
+        elif k.startswith('fc'):
             name_to_layer[k] = 1
         else:
             print("ERROR")
@@ -88,11 +100,13 @@ def _get_name_to_layer(pt_model, model_name):
         return _get_vgg_name_to_layer(pt_model)
     elif model_name.startswith('alexnet'):
         return _get_alexnet_name_to_layer(pt_model)
+    elif model_name.startswith('lenet'):
+        return _get_lenet_name_to_layer(pt_model)
     else:
         raise ValueError
 
 
-def _get_no_decay_param_names(pt_model):
+def _get_resnet_no_decay_param_names(pt_model):
     """获取resnet中不需要weight_decay的参数的名字"""
     no_decay_param_names = []
     for k, v in pt_model.named_parameters():
@@ -115,7 +129,7 @@ def get_optim(pt_model, model_name, optim_name="adam", lr=1e-5, weight_decay=0.0
         layer_scales = list(lr_decay_factor ** (num_layers - i) for i in range(num_layers + 1))
     # 过滤不需要weight decay的参数
     if filter_bias_and_bn is True and weight_decay != 0.0:
-        no_decay_param_names = _get_no_decay_param_names(pt_model)
+        no_decay_param_names = _get_resnet_no_decay_param_names(pt_model)
         for k, v in pt_model.named_parameters():
             if k in no_decay_param_names:
                 param_groups.append({'params': v, 'lr': lr * layer_scales[name_to_layer[k]]})
@@ -130,6 +144,12 @@ def get_optim(pt_model, model_name, optim_name="adam", lr=1e-5, weight_decay=0.0
         opt = torch.optim.AdamW(param_groups, lr=lr)
     elif optim_name.lower() == 'sgd':
         opt = torch.optim.SGD(param_groups, lr=lr)
+    elif optim_name.lower() == 'rmsprop':
+        opt = torch.optim.RMSprop(param_groups, lr=lr)
+    elif optim_name.lower() == 'adadelta':
+        opt = torch.optim.Adadelta(param_groups, lr=lr)
+    elif optim_name.lower() == 'adagrad':
+        opt = torch.optim.Adagrad(param_groups, lr=lr)
 
     return opt
 
