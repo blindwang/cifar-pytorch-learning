@@ -6,7 +6,7 @@ import re
 def _get_resnet_name_to_layer(pt_model):
     """获取resnet中参数的分层，从0开始，层数越高表示越顶层，全连是最顶层（5），返回name: layer的字典"""
     name_to_layer = {}
-    for k,v in pt_model.named_parameters():
+    for k, v in pt_model.named_parameters():
         if k.startswith('conv1.') or k.startswith('bn1.'):
             name_to_layer[k] = 0
         elif k.startswith('layer1.'):
@@ -24,8 +24,27 @@ def _get_resnet_name_to_layer(pt_model):
     return name_to_layer, 5
 
 
+def _get_vgg_name_to_layer(pt_model):
+    """获取googlenet中参数的分层，从0开始，层数越高表示越顶层，全连和辅助分类器是最顶层（5），返回name: layer的字典"""
+    name_to_layer = {}
+    for k, v in pt_model.named_parameters():
+        if v.shape[0] == 64:
+            name_to_layer[k] = 0
+        elif v.shape[0] == 128:
+            name_to_layer[k] = 1
+        elif v.shape[0] == 256:
+            name_to_layer[k] = 2
+        elif v.shape[0] == 512:
+            name_to_layer[k] = 3
+        elif k.startswith('classifier'):
+            name_to_layer[k] = 4
+        else:
+            print("ERROR")
+    return name_to_layer, 4
+
+
 def _get_google_name_to_layer(pt_model):
-    """获取resnet中参数的分层，从0开始，层数越高表示越顶层，全连是最顶层（5），返回name: layer的字典"""
+    """获取vgg中参数的分层，从0开始，层数越高表示越顶层，全连是最顶层（5），返回name: layer的字典"""
     name_to_layer = {}
     for k, v in pt_model.named_parameters():
         if k.startswith('conv1.'):
@@ -52,6 +71,8 @@ def _get_name_to_layer(pt_model, model_name):
         return _get_google_name_to_layer(pt_model)
     elif model_name.startswith('resnet'):
         return _get_resnet_name_to_layer(pt_model)
+    elif model_name.startswith('vgg'):
+        return _get_vgg_name_to_layer(pt_model)
     else:
         raise ValueError
 
@@ -59,13 +80,13 @@ def _get_name_to_layer(pt_model, model_name):
 def _get_resnet_no_decay_param_names(pt_model):
     """获取resnet中不需要weight_decay的参数的名字"""
     no_decay_param_names = []
-    for k,v in pt_model.named_parameters():
+    for k, v in pt_model.named_parameters():
         if re.search("\.?bn[0-9][\.]", k) is not None:  # 如果正则表达式匹配到了batchnorm
             no_decay_param_names.append(k)
-            #print(k)
+            # print(k)
         elif k.endswith('.bias'):
             no_decay_param_names.append(k)
-            #print(k)
+            # print(k)
     return set(no_decay_param_names)
 
 
@@ -102,4 +123,3 @@ def get_scheduler(optim, num_warmup_steps, num_training_steps):
     # num_warmup_steps是warm up阶段的步数
     # num_training_steps是训练总共需要的步数
     return transformers.get_linear_schedule_with_warmup(optim, num_warmup_steps, num_training_steps)
-
