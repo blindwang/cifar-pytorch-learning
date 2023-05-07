@@ -15,6 +15,7 @@ from model import LeNet5
 from utils import bulid_tensorboard_writer
 from optimizer import get_optim, get_scheduler
 from earlystop import EarlyStopping
+from dataloader_simple import build_dataloader_simple
 
 """随机种子"""
 seed = 2023
@@ -39,7 +40,7 @@ models_ls = ["lenet", "alexnet", "resnet18", "vgg16", "googlenet"]
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
-for model_name in models_ls[1:]:
+for model_name in models_ls[0:1]:
     print(f"Training {model_name} model...")
 
     """默认超参数"""
@@ -51,15 +52,17 @@ for model_name in models_ls[1:]:
     """tensorboard writer"""
     train_summary_writer, test_summary_writer = bulid_tensorboard_writer("compare_base", model_name)
 
-    """默认dataloader"""
-    trainloader, testloader, trainset, testset = build_dataloader(batch_size, num_workers)
+    # """默认dataloader"""
+    # trainloader, testloader, trainset, testset = build_dataloader(batch_size, num_workers)
 
     """定义默认网络"""
     if model_name == 'lenet':
         model = LeNet5().to(device)
+        trainloader, testloader, trainset, testset = build_dataloader_simple(batch_size, num_workers)
         learning_rate = 0.001
     else:
         model = finetune_pretrained_model(model_name).to(device)
+        trainloader, testloader, trainset, testset = build_dataloader(batch_size, num_workers)
 
     """定义默认损失函数和优化器"""
     criterion = nn.CrossEntropyLoss()
