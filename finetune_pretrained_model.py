@@ -46,7 +46,7 @@ def finetune_pretrained_model(model_name):
         param.requires_grad = False
     # 但是参数全部固定了，也没法进行学习，所以我们不固定最后一层，即全连接层
     if model_name in ["vgg16", "vgg19", "vgg16bn", "vgg19bn", "alexnet"]:
-        for param in model.classifier[6].parameters():
+        for param in model.classifier.parameters():
             param.requires_grad = True
     else:
         for param in model.fc.parameters():

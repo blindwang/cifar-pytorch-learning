@@ -29,18 +29,18 @@ torch.cuda.manual_seed_all(seed)
 # models_ls = ["resnet18", "resnet50", "vgg16", "vgg16bn", "vgg19",
 #              "vgg19bn", "alexnet", "googlenet"]
 
-models_ls = ["resnet18", "vgg16", "alexnet", "googlenet"]
+models_ls = ["resnet18", "vgg16", "googlenet"]
 
 # 判断是否有可用的GPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
-for model_name in models_ls[1:]:
+for model_name in models_ls[2:]:
     print(f"Training {model_name} model...")
 
     """默认超参数"""
     batch_size = 128
-    learning_rate = 0.001
+    learning_rate = 1e-5
     num_epochs = 100
     num_workers = 2  # CPU中为0，GPU可以不为0
 
